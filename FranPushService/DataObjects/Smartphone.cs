@@ -6,6 +6,6 @@ namespace FranPushService.DataObjects
     {
         public string Modelo { get; set; }
         public string Fabricante { get; set; }
-        public decimal Precio { get; set; }
+        public double Precio { get; set; }
     }
 }
