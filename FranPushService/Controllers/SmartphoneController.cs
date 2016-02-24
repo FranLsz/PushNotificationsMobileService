@@ -8,6 +8,7 @@ using System.Web.Http.OData;
 using FranPushService.DataObjects;
 using FranPushService.Models;
 using Microsoft.WindowsAzure.Mobile.Service;
+using Newtonsoft.Json;
 
 namespace FranPushService.Controllers
 {
@@ -39,19 +40,18 @@ namespace FranPushService.Controllers
         }
 
         // POST tables/Smartphone
-        public async Task<IHttpActionResult> PostSmartphone(Smartphone item)
+        public async Task<IHttpActionResult> PostSmartphone(Smartphone smartphone)
         {
-            Smartphone current = await InsertAsync(item);
+            Smartphone current = await InsertAsync(smartphone);
 
             Dictionary<string, string> data = new Dictionary<string, string>()
             {
-                { "message", item.Modelo}
+                { "mensaje", JsonConvert.SerializeObject(smartphone)}
             };
             GooglePushMessage messageGoogle = new GooglePushMessage(data, TimeSpan.FromHours(1));
 
 
-
-            var wns = @"<?xml version=""1.0"" encoding=""utf - 8""?><toast><visual><binding template=""ToastText01""><text id=""1"">Nuevo smartphone</text><text id=""1"">Modelo: " + item.Modelo + @"</text><text id=""1"">Fabricante: " + item.Fabricante + @"</text></binding></visual><actions><action content=""Ver"" arguments=""check"" /><action content=""Descartar"" arguments=""cancel""/></actions></toast>";
+            var wns = @"<?xml version=""1.0"" encoding=""utf - 8""?><toast><visual><binding template=""ToastText01""><text id=""1"">Nuevo smartphone</text><text id=""1"">Modelo: " + smartphone.Modelo + @"</text><text id=""1"">Fabricante: " + smartphone.Fabricante + @"</text></binding></visual><actions><action content=""Ver"" arguments=""check"" /><action content=""Descartar"" arguments=""cancel""/></actions></toast>";
             WindowsPushMessage messageUwp = new WindowsPushMessage { XmlPayload = wns };
 
             try
