@@ -7,7 +7,9 @@ using System.Web.Http.Controllers;
 using System.Web.Http.OData;
 using FranPushService.DataObjects;
 using FranPushService.Models;
+using Microsoft.ServiceBus.Notifications;
 using Microsoft.WindowsAzure.Mobile.Service;
+using Microsoft.WindowsAzure.Mobile.Service.Notifications;
 using Newtonsoft.Json;
 
 namespace FranPushService.Controllers
@@ -54,14 +56,15 @@ namespace FranPushService.Controllers
             var wns = @"<?xml version=""1.0"" encoding=""utf - 8""?><toast><visual><binding template=""ToastText01""><text id=""1"">Nuevo smartphone</text><text id=""1"">Modelo: " + smartphone.Modelo + @"</text><text id=""1"">Fabricante: " + smartphone.Fabricante + @"</text></binding></visual><actions><action content=""Ver"" arguments=""check"" /><action content=""Descartar"" arguments=""cancel""/></actions></toast>";
             WindowsPushMessage messageUwp = new WindowsPushMessage { XmlPayload = wns };
 
+            List<string> tags = new List<string> { "NuevoSmartphone" };
             try
             {
                 // Google
-                var resultGoogle = await Services.Push.SendAsync(messageGoogle);
+                var resultGoogle = await Services.Push.SendAsync(messageGoogle, tags);
                 Services.Log.Info("Google - " + resultGoogle.State.ToString() + " | " + resultGoogle.TrackingId.ToString() + " | " + messageGoogle);
 
                 // UWP
-                var resultUwp = await Services.Push.SendAsync(messageUwp);
+                var resultUwp = await Services.Push.SendAsync(messageUwp, tags); ;
                 Services.Log.Info("Microsoft - " + resultUwp.State.ToString() + " | " + resultUwp.TrackingId.ToString());
             }
             catch (Exception ex)
