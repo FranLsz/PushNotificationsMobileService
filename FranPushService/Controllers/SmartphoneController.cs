@@ -46,25 +46,43 @@ namespace FranPushService.Controllers
         {
             Smartphone current = await InsertAsync(smartphone);
 
-            Dictionary<string, string> data = new Dictionary<string, string>()
+
+            // Android (Google)
+            var dataGoogle = new Dictionary<string, string>()
             {
                 { "mensaje", JsonConvert.SerializeObject(smartphone)}
             };
-            GooglePushMessage messageGoogle = new GooglePushMessage(data, TimeSpan.FromHours(1));
+            var mensajeGoogle = new GooglePushMessage(dataGoogle, TimeSpan.FromHours(1));
 
+            // UWP
+            var dataUwp = @"<?xml version=""1.0"" encoding=""utf - 8""?>
+<toast>
+    <visual>
+        <binding template=""ToastText01"">
+            <text id=""1"">Nuevo smartphone</text>
+            <text id=""1"">Modelo: " + smartphone.Modelo + @"</text>
+            <text id=""1"">Fabricante: " + smartphone.Fabricante + @"</text>
+        </binding>
+    </visual>
+<actions>
+    <action content=""Ver"" arguments=""check"" />
+    <action content=""Descartar"" arguments=""cancel""/>
+</actions>
+</toast>";
+            var mensajeUwp = new WindowsPushMessage { XmlPayload = dataUwp };
 
-            var wns = @"<?xml version=""1.0"" encoding=""utf - 8""?><toast><visual><binding template=""ToastText01""><text id=""1"">Nuevo smartphone</text><text id=""1"">Modelo: " + smartphone.Modelo + @"</text><text id=""1"">Fabricante: " + smartphone.Fabricante + @"</text></binding></visual><actions><action content=""Ver"" arguments=""check"" /><action content=""Descartar"" arguments=""cancel""/></actions></toast>";
-            WindowsPushMessage messageUwp = new WindowsPushMessage { XmlPayload = wns };
-
+            // Tags
             List<string> tags = new List<string> { "NuevoSmartphone" };
+
+
             try
             {
                 // Google
-                var resultGoogle = await Services.Push.SendAsync(messageGoogle, tags);
-                Services.Log.Info("Google - " + resultGoogle.State.ToString() + " | " + resultGoogle.TrackingId.ToString() + " | " + messageGoogle);
+                var resultGoogle = await Services.Push.SendAsync(mensajeGoogle, tags);
+                Services.Log.Info("Google - " + resultGoogle.State.ToString() + " | " + resultGoogle.TrackingId.ToString() + " | " + mensajeGoogle);
 
                 // UWP
-                var resultUwp = await Services.Push.SendAsync(messageUwp, tags); ;
+                var resultUwp = await Services.Push.SendAsync(mensajeUwp, tags); ;
                 Services.Log.Info("Microsoft - " + resultUwp.State.ToString() + " | " + resultUwp.TrackingId.ToString());
             }
             catch (Exception ex)
